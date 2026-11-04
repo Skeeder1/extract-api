@@ -55,7 +55,7 @@ a{color:var(--acc)}
 <pre># message signé :  extract|&lt;url&gt;|&lt;timestamp&gt;
 SIG=$(cast wallet sign --private-key $PK "extract|$URL|$TS")
 
-curl -X POST https://916085cd4f0414.lhr.life/v1/extract \
+curl -X POST https://openclaw-vm.tail5af44b.ts.net:10000/v1/extract \
   -H 'Content-Type: application/json' \
   -H "X-Payer: $ADDR" -H "X-Timestamp: $TS" -H "X-Signature: $SIG" \
   -d "{\"url\":\"$URL\"}"</pre>
