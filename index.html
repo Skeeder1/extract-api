@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Extract API — URL vers markdown propre, payée à l'appel en USDC</title>
+<meta name="description" content="API d'extraction : une URL entre, un markdown propre sort. 0,02 USDC par appel sur Polygon, sans compte, sans KYC, sans abonnement.">
+<style>
+:root{--bg:#0b0d10;--fg:#e8eaed;--dim:#9aa0a6;--acc:#c9f31d;--card:#15181d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:48px 20px 80px}
+h1{font-size:34px;line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}
+h2{font-size:19px;margin:44px 0 12px;letter-spacing:-.01em}
+p{color:var(--dim);margin:0 0 14px}
+b,strong{color:var(--fg)}
+.pill{display:inline-block;background:#1d2410;color:var(--acc);border:1px solid #33400f;border-radius:99px;padding:4px 12px;font-size:13px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid #232830;border-radius:14px;padding:20px;margin:18px 0}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px}
+pre{background:#0f1216;border:1px solid #232830;border-radius:10px;padding:14px;overflow-x:auto;color:#cfd3d8}
+code{color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+td,th{text-align:left;padding:9px 6px;border-bottom:1px solid #232830;vertical-align:top}
+th{color:var(--fg);font-weight:600}
+td{color:var(--dim)}
+a{color:var(--acc)}
+.small{font-size:13px;color:#7c828a}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}h1{font-size:27px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="pill">Payé à l'appel · 0,02 USDC · Polygon</div>
+  <h1>Une URL entre.<br>Un markdown propre sort.</h1>
+  <p>API d'extraction de contenu pour agents et développeurs. Pas de compte, pas de clé API, pas d'abonnement :
+  <b>le paiement est l'identité</b>. Vous envoyez des USDC, vos appels sont crédités à votre adresse.</p>
+
+  <div class="card">
+    <table>
+      <tr><th>Prix</th><td><b>0,02 USDC</b> par appel (1 USDC = 50 appels)</td></tr>
+      <tr><th>Réseau</th><td>Polygon (USDC natif)</td></tr>
+      <tr><th>Adresse de paiement</th><td><code>0x8dceAAE8788E232bFc5F825B6D6bf696E5b82DfC</code></td></tr>
+      <tr><th>Sortie</th><td>markdown (liens et mise en forme conservés), titre, code HTTP</td></tr>
+      <tr><th>Limites</th><td>pages publiques · 25 s max · pas d'adresses internes · 6 Mo</td></tr>
+    </table>
+  </div>
+
+  <h2>Comment payer</h2>
+  <p>1. Transférez des USDC (réseau <b>Polygon</b>) à l'adresse ci-dessus. Les appels sont crédités à <b>l'adresse émettrice</b>, pas besoin de déclarer quoi que ce soit.</p>
+  <p>2. Vérifiez votre solde : <code>GET /v1/credits/&lt;votre_adresse&gt;</code></p>
+  <p>3. Appelez l'API en signant chaque requête avec votre clé (EIP-191). Aucun gas, aucune signature on-chain.</p>
+
+  <h2>Appel</h2>
+<pre># message signé :  extract|&lt;url&gt;|&lt;timestamp&gt;
+SIG=$(cast wallet sign --private-key $PK "extract|$URL|$TS")
+
+curl -X POST https://faffc6bff356c7.lhr.life/v1/extract \
+  -H 'Content-Type: application/json' \
+  -H "X-Payer: $ADDR" -H "X-Timestamp: $TS" -H "X-Signature: $SIG" \
+  -d "{\"url\":\"$URL\"}"</pre>
+  <p class="small">Réponse : <code>{title, markdown, chars, status, ms, blocked}</code>. Un appel est décompté par requête servie.</p>
+
+  <h2>Pourquoi payer ça</h2>
+  <p>Écrire un extracteur qui tient dans le temps coûte plus cher que 0,02 USDC : sélecteurs cassés, anti-bot,
+  encodages, redirections. Ici vous payez la sortie, pas la maintenance.</p>
+
+  <h2>Erreurs</h2>
+  <table>
+    <tr><th>402</th><td>paiement requis / crédit épuisé (le corps indique le prix et l'adresse)</td></tr>
+    <tr><th>401</th><td>signature ou timestamp invalide (±5 min)</td></tr>
+    <tr><th>400</th><td>URL invalide ou adresse interne refusée</td></tr>
+    <tr><th>502</th><td>échec de récupération côté site source — non décompté</td></tr>
+  </table>
+
+  <h2>État du service</h2>
+  <p><code>GET /</code> renvoie le prix courant et l'adresse de paiement en JSON. Le service ne conserve que
+  l'adresse du payeur, l'URL demandée et la durée — aucune donnée personnelle, aucun cookie, aucun profilage.</p>
+
+  <p class="small" style="margin-top:36px">Extract API · paiement en USDC sur Polygon · aucun compte requis.</p>
+</div>
+</body>
+</html>
